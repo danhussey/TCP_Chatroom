@@ -16,6 +16,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <string>
+#include <sstream>
+#include <map>
+#include <vector>
 
 #define PORT 1234
 #define BUFFER_SZ 200
@@ -24,6 +27,8 @@
 int main (int argc, char const *argv[])
 {
     int server_fd = 0, new_socket_fd = 0;
+    const std::pair<std::string, std::string> unsetPair = std::make_pair("Unset", "Unset");
+    std::map<int, std::pair<std::string, std::string>> nicknames;
     ssize_t read_length;
     struct sockaddr_in address; // Socket descriptor structure
     int opt = 1;
@@ -124,6 +129,9 @@ int main (int argc, char const *argv[])
                  if (client_sockets[i] == 0) {
                      client_sockets[i] = new_socket_fd;
                      printf("Added client to list of sockets at position %d.\n", i);
+                     
+                     // Add his fd to the nickname list but indicate that they haven't set one yet
+                     nicknames[new_socket_fd] = std::make_pair("Unset", "Unset");
                      break;
                  }
              }
@@ -144,12 +152,82 @@ int main (int argc, char const *argv[])
                      client_sockets[i] = 0;
                  }
                  
-                 //Echo back the message that came in
+                 // Handle the connection
                 else
                 {
-                    //set the string terminating NULL byte on the end of the data read
+                    // Make sure buffer is null byte terminated and format into string
                     buffer[read_length] = '\0';
-                    send(temp_fd, buffer , strlen(buffer) , 0 );
+                    
+                    // Check if it's from a user without a username
+                    if (nicknames[temp_fd] ==  unsetPair) {
+                        // The command must be a join command otherwise send error and disconnect
+                        
+                        // Sanitise command
+                        std::stringstream ss;
+                        ss << buffer;
+                        std::string token;
+                        std::vector<std::string> command;
+                        
+                        std::string endingStrippedCommand;
+                        
+                        while (std::getline(ss, token)) {
+                            endingStrippedCommand = token;
+                            
+                        }
+                        ss.clear();
+                        ss << endingStrippedCommand;
+                        
+                        while (std::getline(ss, token, ' ')) {
+                            command.push_back(token);
+                        }
+                        std::string finalWord = std::string(*(command.end()-1));
+                        finalWord.erase(finalWord.length()-1);
+                        *(command.end()-1) = finalWord;
+                        
+                        
+                        
+                        if (command.size() != 3) {
+                            // Send error message
+                            std::string error = "ERROR\n";
+                            send(temp_fd, error.c_str(), error.size()+1, 0);
+                            close(temp_fd);
+                            client_sockets[i] = 0;
+                        }
+                        else {
+                            
+                            if (command[0] == "join") {
+                                // Assign nickname and chatroom to the fd key of the client in the array
+                                nicknames[temp_fd] = std::make_pair(command[1], command[2]);
+                            }
+                        }
+                    }
+                    
+                    // If the client has an associated chatroom and nickname
+                    else {
+                        
+                        // Construct message body ready to be sent
+                        std::ostringstream oss;
+                        
+                        oss << nicknames[temp_fd].second << ": " << buffer << "\n";
+                        // Probably check message body length here
+                        std::string message_body = oss.str();
+                        oss.clear();
+                        
+                        for (int j = 0; j < MAX_CONNECTIONS; j++) {
+                            
+                            int temp_fd_2 = client_sockets[j];
+                            if (FD_ISSET(temp_fd_2, &socket_fds) || temp_fd_2 > 0 ) {
+                                if (nicknames[temp_fd_2].first == nicknames[temp_fd].first) {
+                                    // Send message to connected clients in the same chatroom
+                                    send(temp_fd_2, message_body.c_str(), message_body.size() + 1 , 0 );
+                                }
+                            }
+                        }
+                        
+                        // Null out the buffer
+                        memset(buffer, '\0', strlen(buffer));
+                    }
+                   
                 }
              }
          }
