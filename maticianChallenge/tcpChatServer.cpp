@@ -70,7 +70,7 @@ int main(int argc, char const *argv[])
     int opt = 1; // For socket configuration
 
     // Sockets are the key to a nickname - chatroom string pair, in a map used to keep track of clients
-    std::map<int, std::pair<std::string, std::string>> nicknames;
+    std::map<int, std::pair<std::string, std::string> > nicknames;
     // For easy initialisation and comparisons with unconfigured but connected clients (people in the 'lobby')
     const std::pair<std::string, std::string> unsetPair = std::make_pair("Unset", "Unset");
 

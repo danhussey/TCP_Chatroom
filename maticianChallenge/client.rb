@@ -4,7 +4,7 @@ require 'socket'
 s = TCPSocket.new 'localhost', 1234
 
 $i = 0
-$j = 1999500
+$j = 19998
 $testString = ""
 s.write("join chat #{ARGV[0]}\n")
 
