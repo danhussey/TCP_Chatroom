@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		6D66581F25065BD8002C2396 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D66581E25065BD8002C2396 /* main.cpp */; };
+		6DBD502F250729D300F3A6DF /* tcpChatServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6DBD502D250729D300F3A6DF /* tcpChatServer.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,6 +27,8 @@
 		6D66581B25065BD8002C2396 /* maticianChallenge */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = maticianChallenge; sourceTree = BUILT_PRODUCTS_DIR; };
 		6D66581E25065BD8002C2396 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		6DBD502C2506601000F3A6DF /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = ../../../../../usr/local/Cellar/boost/1.73.0/include; sourceTree = "<group>"; };
+		6DBD502D250729D300F3A6DF /* tcpChatServer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = tcpChatServer.cpp; sourceTree = "<group>"; };
+		6DBD502E250729D300F3A6DF /* tcpChatServer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = tcpChatServer.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +63,8 @@
 			isa = PBXGroup;
 			children = (
 				6D66581E25065BD8002C2396 /* main.cpp */,
+				6DBD502D250729D300F3A6DF /* tcpChatServer.cpp */,
+				6DBD502E250729D300F3A6DF /* tcpChatServer.hpp */,
 			);
 			path = maticianChallenge;
 			sourceTree = "<group>";
@@ -129,6 +134,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6DBD502F250729D300F3A6DF /* tcpChatServer.cpp in Sources */,
 				6D66581F25065BD8002C2396 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
