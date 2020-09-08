@@ -1,8 +1,8 @@
 #!/bin/bash
 
-for N in {1..98}
+for N in {1..99}
 do
-    ruby client.rb $N >/dev/null &
+    ruby client.rb $N &
 done
 wait
 
