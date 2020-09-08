@@ -29,6 +29,8 @@
 		6DBD502C2506601000F3A6DF /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = ../../../../../usr/local/Cellar/boost/1.73.0/include; sourceTree = "<group>"; };
 		6DBD502D250729D300F3A6DF /* tcpChatServer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = tcpChatServer.cpp; sourceTree = "<group>"; };
 		6DBD502E250729D300F3A6DF /* tcpChatServer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = tcpChatServer.hpp; sourceTree = "<group>"; };
+		6DBD503025078AA000F3A6DF /* client.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = client.rb; sourceTree = "<group>"; };
+		6DBD503225078CC400F3A6DF /* manyClients.bash */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = manyClients.bash; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,8 +64,10 @@
 		6D66581D25065BD8002C2396 /* maticianChallenge */ = {
 			isa = PBXGroup;
 			children = (
+				6DBD503225078CC400F3A6DF /* manyClients.bash */,
 				6D66581E25065BD8002C2396 /* main.cpp */,
 				6DBD502D250729D300F3A6DF /* tcpChatServer.cpp */,
+				6DBD503025078AA000F3A6DF /* client.rb */,
 				6DBD502E250729D300F3A6DF /* tcpChatServer.hpp */,
 			);
 			path = maticianChallenge;
