@@ -21,8 +21,36 @@
 #include <vector>
 
 #define PORT 1234
-#define BUFFER_SZ 200
+#define BUFFER_SZ 20000
 #define MAX_CONNECTIONS 3
+
+//bool bufferIsValidJoinCommand (char* buf, ssize_t length) {
+//
+//    // If the read buffer isn't null terminated, return false
+//    if (buf[length] != '\0') return false;
+//
+//
+//}
+//
+//bool isValidBuffer (std::string input) {
+//    // Simple size check
+//    if (input.size() > sizeof(char)*buffer)
+//}
+//
+//std::string sanitiseInput (std::string input) {
+//
+//}
+//
+//std::string trimString (
+//
+//bool isValidUsername (std::string username) {
+//
+//    // Perform checks on a given username to see if it's within protocol rules
+//
+//    // Username must be ASCII 128 characters, so ranging from int 0 to 127 as chars
+//
+//
+//}
 
 int main (int argc, char const *argv[])
 {
@@ -31,9 +59,9 @@ int main (int argc, char const *argv[])
     std::map<int, std::pair<std::string, std::string>> nicknames;
     ssize_t read_length;
     struct sockaddr_in address; // Socket descriptor structure
-    int opt = 1;
     int addrlen = sizeof(address);
     char buffer[BUFFER_SZ];
+    memset(buffer, '\0', BUFFER_SZ);
     std::string welcomeMsg = "Connected to chat server.\n";
     
     // Create socket FD
@@ -141,26 +169,56 @@ int main (int argc, char const *argv[])
          for (int i = 0; i < MAX_CONNECTIONS; i++) {
              int temp_fd = client_sockets[i];
              if (FD_ISSET(temp_fd, &socket_fds)) {
-                 // Check if connection was closed
-                 if ((read_length = read(temp_fd, buffer, BUFFER_SZ)) == 0) {
+                 
+                 // Check if connection was closed (read length of 0 indicates an EOF was read)
+                 if ((read_length = read(temp_fd, buffer, BUFFER_SZ-1)) == 0) {
                      // Someone disconnected
                      getpeername(temp_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
                      printf("Host disconnected, ip %s, port %d, \n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
                      
-                     // Close socket and delete it from client fd list
+                     // Close socket and delete it from client fd list, and their username and chatroom from the nicknames map
+                     int temp_fd_copy = temp_fd;
+                     
                      close(temp_fd);
                      client_sockets[i] = 0;
+                     
+                     // Announce to room they left
+                     for (int j = 0; j < MAX_CONNECTIONS; j++) {
+                         int temp_fd_2 = client_sockets[j];
+                         if (FD_ISSET(temp_fd_2, &socket_fds) || temp_fd_2 > 0 ) {
+                             if (nicknames[temp_fd_2].first == nicknames[temp_fd_copy].first) {
+                                 // Send message to connected clients in the same chatroom
+                                 std::stringstream leaveSs;
+                                 leaveSs << nicknames[temp_fd_copy].second << " has left\n";
+                                 send(temp_fd_2, leaveSs.str().c_str(), leaveSs.str().size() + 1 , 0 );
+                             }
+                         }
+                     }
+                     
+                     nicknames.erase(temp_fd);
+                     
+                     
                  }
                  
-                 // Handle the connection
-                else
-                {
+                 // Read return value of -1 indicates an error
+                 else if (read_length == -1) {
+                     perror("Error reading from socket");
+                     exit(EXIT_FAILURE);
+                 }
+                 
+                 // A read return of above 0 means that a number of bytes were read. Handle the incoming bytes now.
+                 else
+                 {
                     // Make sure buffer is null byte terminated and format into string
-                    buffer[read_length] = '\0';
+                     buffer[read_length] = '\0';
+//                     buffer[strcspn(buffer, "\r\n")] = 0;
                     
                     // Check if it's from a user without a username
                     if (nicknames[temp_fd] ==  unsetPair) {
-                        // The command must be a join command otherwise send error and disconnect
+                        
+                        // The command must be a correctly parsed join command, otherwise send error and disconnect
+                        // Must be 'join [room] [name]', with join case insensitive, and the room and name strings must
+                        // be less than 20 characters, and made of ASCII characters only.
                         
                         // Sanitise command
                         std::stringstream ss;
@@ -195,9 +253,22 @@ int main (int argc, char const *argv[])
                         }
                         else {
                             
-                            if (command[0] == "join") {
+                            if (strncasecmp(command[0].c_str(), "join", 4) == 0) {
                                 // Assign nickname and chatroom to the fd key of the client in the array
                                 nicknames[temp_fd] = std::make_pair(command[1], command[2]);
+                            }
+                            
+                            // Announce the join to the room
+                            for (int j = 0; j < MAX_CONNECTIONS; j++) {
+                                int temp_fd_2 = client_sockets[j];
+                                if (FD_ISSET(temp_fd_2, &socket_fds) || temp_fd_2 > 0 ) {
+                                    if (nicknames[temp_fd_2].first == nicknames[temp_fd].first) {
+                                        // Send message to connected clients in the same chatroom
+                                        std::stringstream leaveSs;
+                                        leaveSs << nicknames[temp_fd].second << " has joined\n";
+                                        send(temp_fd_2, leaveSs.str().c_str(), leaveSs.str().size() + 1 , 0 );
+                                    }
+                                }
                             }
                         }
                     }
@@ -224,68 +295,15 @@ int main (int argc, char const *argv[])
                             }
                         }
                         
-                        // Null out the buffer
-                        memset(buffer, '\0', strlen(buffer));
+                        
                     }
                    
                 }
+                 // Null out the buffer
+                 memset(buffer, '\0', strlen(buffer));
              }
          }
-     
-         
-         
-//
-//
-//
-//        FD_ZERO(&socket_fds);
-//
-//        // Add listening socket to the FD set
-//        FD_SET(server_fd, socket_fds);
-//
-//
-//
-//
-//        // Make copy of socket fds
-//        fd_set socket_fds_copy = socket_fds;
-//
-//        // Extract the first connection request on the queue of pending connection, create a new socket with the same properties of the parameter socket, and allocated a new file descriptor for the socket
-//        // Blocks if the queue is empty
-//        if ((new_socket = accept(server_fd, (struct sockaddr *) &address, (socklen_t*)&addrlen)) <0)
-//        {
-//            perror("Errror accepting connection.\n");
-//            exit(EXIT_FAILURE);
-//        }
-//
-//        // Update max file descriptor value for select functionality
-//
-//        if (new_socket == server_fd)
-//
-//        FD_SET(new_socket, &socket_fds_copy);
-//
-//
-//
-//        for (int i = 0; i < fdmax; i++) {
-//
-//            // Initialise file descriptor array for synchronous socket IO
-//            int ready_sockets = select(fdmax + 1, &socket_fds_copy, nullptr, nullptr, nullptr);
-//
-//            // If we find a socket ready for IO
-//            if (FD_ISSET(i, &socket_fds_copy) {
-//                 if (new_socket == server_fd)
-//
-//            }
-//            int nextSocket = socket_fds_copy;
-//        }
-//
-//
-//
-//
-//
-//        read_length = read(new_socket, buffer, BUFFER_SZ);
-//        printf("%s\n", buffer);
-//        send(new_socket, welcomeMsg.c_str(), welcomeMsg.size() + 1, 0);
-//        printf("Hello message sent.\n");
-    }
+     }
     
     return 0;
 }
