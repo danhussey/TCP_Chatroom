@@ -1,10 +1,13 @@
 //
 //  tcpChatServer.cpp
-//  maticianChallenge
 //
 //  Created by Daniel Hussey on 8/9/20.
 //  Copyright © 2020 Daniel Hussey. All rights reserved.
 //
+//  Reasonably performant simple TCP Chat server.
+//  Port number is an optional argument for the executable, otherwise listens on port 1234
+//  Type "join [room] [name]" to enter a room with a nickname
+//  Can be interfaced with telnet.
 
 #include <stdio.h>
 #include <unistd.h>
