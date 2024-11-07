@@ -1,3 +1,5 @@
+# Summary: Helper file that connects to the TCP chatroom and sends some test strings
+# used to test the performance of the server
 
 require 'socket'
 #starttime = Process.clock_gettime(Process::CLOCK_MONOTONIC)
